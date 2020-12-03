@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -105,25 +104,16 @@ func parse(input []string) ([]passwordEntry, error) {
 	var passwordDatabase []passwordEntry
 	for _, entry := range input {
 
-		sections := strings.Split(entry, " ")
-
-		limits := strings.Split(sections[0], "-")
-		min, err := strconv.Atoi(limits[0])
-		if err != nil {
-			return nil, errors.Wrap(err, " > parsing min")
-		}
-		max, err := strconv.Atoi(limits[1])
-		if err != nil {
-			return nil, errors.Wrap(err, " > parsing max")
-		}
-		policyCharacter := strings.Trim(sections[1], ":")
-		password := sections[2]
+		var min, max int
+		var password string
+		var policyCharacter byte
+		fmt.Sscanf(entry, "%v-%v %c: %v", &min, &max, &policyCharacter, &password)
 
 		passwordDatabase = append(passwordDatabase, passwordEntry{
 			policy: passwordPolicy{
 				min:       min,
 				max:       max,
-				character: policyCharacter,
+				character: string(policyCharacter),
 			},
 			password: password,
 		})

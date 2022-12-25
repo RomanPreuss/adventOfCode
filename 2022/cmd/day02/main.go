@@ -68,37 +68,26 @@ func evalGame(game string) int {
 	opp := moves[0]
 	me := moves[1]
 
-	if me == ME_ROCK && opp == OPP_SCISSOR {
-		return SCORE_WIN + shapeScore(me)
-	}
-	if me == ME_PAPER && opp == OPP_ROCK {
-		return SCORE_WIN + shapeScore(me)
-	}
-	if me == ME_SCISSOR && opp == OPP_PAPER {
-		return SCORE_WIN + shapeScore(me)
-	}
-
-	if me == ME_ROCK && opp == OPP_ROCK {
-		return SCORE_DRAW + shapeScore(me)
-	}
-	if me == ME_PAPER && opp == OPP_PAPER {
-		return SCORE_DRAW + shapeScore(me)
-	}
-	if me == ME_SCISSOR && opp == OPP_SCISSOR {
-		return SCORE_DRAW + shapeScore(me)
-	}
-
-	if me == ME_ROCK && opp == OPP_PAPER {
-		return SCORE_LOOSE + shapeScore(me)
-	}
-	if me == ME_PAPER && opp == OPP_SCISSOR {
-		return SCORE_LOOSE + shapeScore(me)
-	}
-	if me == ME_SCISSOR && opp == OPP_ROCK {
-		return SCORE_LOOSE + shapeScore(me)
+	// rock bets scissor
+	ruleScore := map[rune]map[rune]int{
+		ME_ROCK: {
+			OPP_ROCK:    SCORE_DRAW,
+			OPP_SCISSOR: SCORE_WIN,
+			OPP_PAPER:   SCORE_LOOSE,
+		},
+		ME_SCISSOR: {
+			OPP_ROCK:    SCORE_LOOSE,
+			OPP_SCISSOR: SCORE_DRAW,
+			OPP_PAPER:   SCORE_WIN,
+		},
+		ME_PAPER: {
+			OPP_ROCK:    SCORE_WIN,
+			OPP_SCISSOR: SCORE_LOOSE,
+			OPP_PAPER:   SCORE_DRAW,
+		},
 	}
 
-	return -1
+	return ruleScore[me][opp] + shapeScore(me)
 }
 
 func shapeScore(shape rune) int {

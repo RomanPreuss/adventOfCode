@@ -55,46 +55,44 @@ func main() {
 	fmt.Println("2. Total score:", totalScoreLvl2)
 }
 
-func totalScore(instructions []int) int {
+func totalScore(scores []int) int {
 	totalScore := 0
-	for _, score := range instructions {
+	for _, score := range scores {
 		totalScore += score
 	}
 	return totalScore
 }
 
-func play(reader io.Reader, evalGame func(string) int) (gameScores []int) {
+func play(reader io.Reader, evalGame func(rune, rune) int) (gameScores []int) {
 	scanner := bufio.NewScanner(reader)
 
 	for scanner.Scan() {
 		game := scanner.Text()
-		gameScores = append(gameScores, evalGame(game))
+		game = strings.ReplaceAll(game, " ", "")
+
+		moves := make([]rune, 2)
+		for i, r := range game {
+			moves[i] = r
+		}
+
+		gameScores = append(gameScores, evalGame(moves[0], moves[1]))
 	}
 	fmt.Println("games", len(gameScores))
 	return
 }
 
-func evalGameV2(game string) int {
-	game = strings.ReplaceAll(game, " ", "")
-
-	moves := make([]rune, 2)
-	for i, r := range game {
-		moves[i] = r
-	}
-
-	opp := moves[0]
-	me := moves[1]
-	score := 0
+func evalGameV2(opp, me rune) int {
+	gameScore := 0
 	switch me {
 	case SHOULD_DRAW:
-		score = SCORE_DRAW
+		gameScore = SCORE_DRAW
 	case SHOULD_LOOSE:
-		score = SCORE_LOOSE
+		gameScore = SCORE_LOOSE
 	case SHOULD_WIN:
-		score = SCORE_WIN
+		gameScore = SCORE_WIN
 	}
 
-	ruleScore := ruleSet{
+	shapeScore := ruleSet{
 		SHOULD_LOOSE: {
 			OPP_ROCK:    SCORE_SCISSOR,
 			OPP_SCISSOR: SCORE_PAPER,
@@ -112,21 +110,11 @@ func evalGameV2(game string) int {
 		},
 	}
 
-	return score + ruleScore[me][opp]
+	return gameScore + shapeScore[me][opp]
 }
-func evalGameV1(game string) int {
-	game = strings.ReplaceAll(game, " ", "")
 
-	moves := make([]rune, 2)
-	for i, r := range game {
-		moves[i] = r
-	}
-
-	opp := moves[0]
-	me := moves[1]
-
-	// rock bets scissor
-	ruleScore := ruleSet{
+func evalGameV1(opp, me rune) int {
+	gameScore := ruleSet{
 		ME_ROCK: {
 			OPP_ROCK:    SCORE_DRAW,
 			OPP_SCISSOR: SCORE_WIN,
@@ -144,7 +132,7 @@ func evalGameV1(game string) int {
 		},
 	}
 
-	return ruleScore[me][opp] + shapeScore(me)
+	return gameScore[me][opp] + shapeScore(me)
 }
 
 func shapeScore(shape rune) int {

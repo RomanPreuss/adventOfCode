@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+type ruleSet map[rune]map[rune]int
+
 const SCORE_LOOSE = 0
 const SCORE_DRAW = 3
 const SCORE_WIN = 6
@@ -20,22 +22,37 @@ const ME_ROCK = 'X'
 const ME_PAPER = 'Y'
 const ME_SCISSOR = 'Z'
 
+const SHOULD_LOOSE = 'X'
+const SHOULD_DRAW = 'Y'
+const SHOULD_WIN = 'Z'
+
 const OPP_ROCK = 'A'
 const OPP_PAPER = 'B'
 const OPP_SCISSOR = 'C'
 
 func main() {
 	fmt.Println("Day 02")
-	file, err := os.Open("input.txt")
+	fileLvl1, err := os.Open("lvl1.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer file.Close()
+	defer fileLvl1.Close()
 
-	gameScores := play(file)
-	totalScore := totalScore(gameScores)
+	gameScoresLvl1 := play(fileLvl1, evalGameV1)
+	totalScoreLvl1 := totalScore(gameScoresLvl1)
 
-	fmt.Println("1. Total score:", totalScore)
+	fmt.Println("1. Total score:", totalScoreLvl1)
+
+	fileLvl2, err := os.Open("lvl2.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer fileLvl2.Close()
+
+	gameScoresLvl2 := play(fileLvl2, evalGameV2)
+	totalScoreLvl2 := totalScore(gameScoresLvl2)
+
+	fmt.Println("2. Total score:", totalScoreLvl2)
 }
 
 func totalScore(instructions []int) int {
@@ -46,7 +63,7 @@ func totalScore(instructions []int) int {
 	return totalScore
 }
 
-func play(reader io.Reader) (gameScores []int) {
+func play(reader io.Reader, evalGame func(string) int) (gameScores []int) {
 	scanner := bufio.NewScanner(reader)
 
 	for scanner.Scan() {
@@ -57,7 +74,47 @@ func play(reader io.Reader) (gameScores []int) {
 	return
 }
 
-func evalGame(game string) int {
+func evalGameV2(game string) int {
+	game = strings.ReplaceAll(game, " ", "")
+
+	moves := make([]rune, 2)
+	for i, r := range game {
+		moves[i] = r
+	}
+
+	opp := moves[0]
+	me := moves[1]
+	score := 0
+	switch me {
+	case SHOULD_DRAW:
+		score = SCORE_DRAW
+	case SHOULD_LOOSE:
+		score = SCORE_LOOSE
+	case SHOULD_WIN:
+		score = SCORE_WIN
+	}
+
+	ruleScore := ruleSet{
+		SHOULD_LOOSE: {
+			OPP_ROCK:    SCORE_SCISSOR,
+			OPP_SCISSOR: SCORE_PAPER,
+			OPP_PAPER:   SCORE_ROCK,
+		},
+		SHOULD_DRAW: {
+			OPP_ROCK:    SCORE_ROCK,
+			OPP_SCISSOR: SCORE_SCISSOR,
+			OPP_PAPER:   SCORE_PAPER,
+		},
+		SHOULD_WIN: {
+			OPP_ROCK:    SCORE_PAPER,
+			OPP_SCISSOR: SCORE_ROCK,
+			OPP_PAPER:   SCORE_SCISSOR,
+		},
+	}
+
+	return score + ruleScore[me][opp]
+}
+func evalGameV1(game string) int {
 	game = strings.ReplaceAll(game, " ", "")
 
 	moves := make([]rune, 2)
@@ -69,7 +126,7 @@ func evalGame(game string) int {
 	me := moves[1]
 
 	// rock bets scissor
-	ruleScore := map[rune]map[rune]int{
+	ruleScore := ruleSet{
 		ME_ROCK: {
 			OPP_ROCK:    SCORE_DRAW,
 			OPP_SCISSOR: SCORE_WIN,

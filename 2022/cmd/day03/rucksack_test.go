@@ -2,10 +2,32 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func Test_FindGroups(t *testing.T) {
+	input := `vJrwpWtwJgWrhcsFMMfFFhFp
+jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+PmmdzqPrVvPwwTWBwg
+wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+ttgJtRGJQctTZtZT
+CrZsJsPPZsGzwwsLwLmpwMDw`
+
+	assert.Equal(t, 70, lvl2(strings.NewReader(input)))
+}
+
+func Test_FindDuplicatesV2(t *testing.T) {
+	assert.Equal(t, string('A'), string(findDuplicateV2("Abc", "ABC", "swA")))
+
+	assert.Equal(t, string('r'), string(findDuplicateV2([]string{
+		"vJrwpWtwJgWrhcsFMMfFFhFp",
+		"jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL",
+		"PmmdzqPrVvPwwTWBwg",
+	}...)))
+}
 
 func Test_FindDuplicates(t *testing.T) {
 	testCases := []struct {

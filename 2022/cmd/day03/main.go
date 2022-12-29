@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"unicode/utf8"
@@ -17,7 +18,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	scanner := bufio.NewScanner(file)
+	fmt.Println("1. sum of priorities:", lvl1(file))
+
+	file, err = os.Open("lvl2.txt")
+	defer func() { _ = file.Close() }()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("2. sum of priorities:", lvl2(file))
+}
+
+func lvl1(reader io.Reader) int {
+	scanner := bufio.NewScanner(reader)
 
 	sum := 0
 	for scanner.Scan() {
@@ -28,8 +41,45 @@ func main() {
 		}
 		sum += getPriority(item)
 	}
+	return sum
+}
 
-	fmt.Println("1. sum of priorities:", sum)
+func lvl2(reader io.Reader) int {
+	scanner := bufio.NewScanner(reader)
+
+	i := 1
+	sum := 0
+	group := make([]string, 3)
+	for scanner.Scan() {
+		group[i%3] = scanner.Text()
+		if i%3 == 0 {
+			r := findDuplicateV2(group...)
+			sum += getPriority(r)
+		}
+		i++
+	}
+	return sum
+}
+
+func findDuplicateV2(inputs ...string) rune {
+	uniqueItems := []map[rune]bool{{}, {}, {}}
+	var uniqueItem rune
+	for i, rucksack := range inputs {
+		for _, r := range rucksack {
+			uniqueItems[i][r] = true
+		}
+	}
+	set := map[rune]int{}
+	for _, rucksack := range uniqueItems {
+		for r, _ := range rucksack {
+			set[r]++
+			if set[r] == 3 {
+				return r
+			}
+		}
+	}
+
+	return uniqueItem
 }
 
 func findDuplicate(input string) (rune, bool) {

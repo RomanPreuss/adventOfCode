@@ -19,33 +19,49 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println("1. sum of fully contained cleaning assignement pairs:", lvl1(file))
+	numOverlaps, numFullyContained := eval(file)
+	fmt.Println("1. num of fully contained cleaning assignement pairs:", numFullyContained)
+	fmt.Println("2. sum of overlapping cleaning assignement pairs:", numOverlaps)
 }
 
-func lvl1(reader io.Reader) int {
+func eval(reader io.Reader) (numOverlaps int, numFullyContained int) {
 	scanner := bufio.NewScanner(reader)
 
-	sum := 0
 	for scanner.Scan() {
 		cleaningRange := strings.Split(scanner.Text(), ",")
-		fullyContained := fullyContains(cleaningRange[0], cleaningRange[1])
+		overlaps, fullyContained := detectOverlaps(cleaningRange[0], cleaningRange[1])
+		if overlaps {
+			numOverlaps++
+		}
 		if fullyContained {
-			sum++
+			numFullyContained++
 		}
 	}
-	return sum
+	return numOverlaps, numFullyContained
 }
 
-func fullyContains(rangeA, rangeB string) bool {
+func detectOverlaps(rangeA, rangeB string) (overlaps bool, fullyContained bool) {
 
 	a := split(rangeA)
 	b := split(rangeB)
 
-	if (a[1] < b[1] && a[0] < b[0]) || (b[1] < a[1] && b[0] < a[0]) {
-		return false
+	// fully contained
+	if (a[0] >= b[0] && a[1] <= b[1]) || (b[0] >= a[0] && b[1] <= a[1]) {
+		overlaps = true
+		fullyContained = true
+		return
 	}
 
-	return true
+	// no overlap
+	if (a[1] < b[1] && a[1] < b[0]) || (b[1] < a[1] && b[1] < a[0]) {
+		overlaps = false
+		fullyContained = false
+		return
+	}
+
+	overlaps = true
+	fullyContained = false
+	return
 }
 
 func split(inRange string) []int {

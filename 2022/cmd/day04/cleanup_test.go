@@ -7,18 +7,37 @@ import (
 )
 
 func Test_Cleanup(t *testing.T) {
-	t.Run(`should not fully contain - no overlap`, func(t *testing.T) {
-		assert.False(t, fullyContains("2-4", "6-8"))
-		assert.False(t, fullyContains("6-8", "2-4"))
+	t.Run(`should not overlap`, func(t *testing.T) {
+		overlaps, fullContained := detectOverlaps("2-4", "6-8")
+		assert.False(t, overlaps)
+		assert.False(t, fullContained)
+
+		overlaps, fullContained = detectOverlaps("6-8", "2-4")
+		assert.False(t, overlaps)
+		assert.False(t, fullContained)
 	})
 
-	t.Run(`should not fully contain - with overlap`, func(t *testing.T) {
-		assert.False(t, fullyContains("2-6", "4-8"))
-		assert.False(t, fullyContains("4-8", "2-6"))
+	t.Run(`should overlap but not fully contain`, func(t *testing.T) {
+		overlaps, fullContained := detectOverlaps("2-6", "4-8")
+		assert.True(t, overlaps)
+		assert.False(t, fullContained)
+
+		overlaps, fullContained = detectOverlaps("4-8", "2-6")
+		assert.True(t, overlaps)
+		assert.False(t, fullContained)
 	})
 
 	t.Run(`should fully contain`, func(t *testing.T) {
-		assert.True(t, fullyContains("2-8", "3-7"))
-		assert.True(t, fullyContains("3-7", "2-8"))
+		overlaps, fullContained := detectOverlaps("2-4", "2-4")
+		assert.True(t, overlaps)
+		assert.True(t, fullContained)
+
+		overlaps, fullContained = detectOverlaps("2-8", "3-7")
+		assert.True(t, overlaps)
+		assert.True(t, fullContained)
+
+		overlaps, fullContained = detectOverlaps("3-7", "2-8")
+		assert.True(t, overlaps)
+		assert.True(t, fullContained)
 	})
 }

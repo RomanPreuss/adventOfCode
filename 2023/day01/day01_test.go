@@ -35,11 +35,9 @@ func TestMain(t *testing.T) {
 			log.Fatal(err)
 		}
 
-		numbers := day01.ExtractNumbers(file)
-		sum := helper.Sum(numbers)
+		sum := day01.Level2(file)
 
 		log.Println("Day01")
-		// 55447 too high
 		log.Println("Level2: ", sum)
 
 		t.Fail()
@@ -93,4 +91,29 @@ func TestFindNumberEdgeCases(t *testing.T) {
 		res := day01.FindNum("kjrqmzv9mmtxhgvsevenhvq7")
 		assert.Equal(t, []rune{'9', '7', '7'}, res)
 	})
+}
+
+func TestParseNumbers(t *testing.T) {
+	t.Run("331s2twonep", func(t *testing.T) {
+		res := day01.ParseNumbers("331s2twonep")
+		assert.Equal(t, []rune{'3', '3', '1', '2', '2', '1'}, res)
+	})
+	t.Run("seven", func(t *testing.T) {
+		res := day01.ParseNumbers("seven")
+		assert.Equal(t, []rune{'7'}, res)
+	})
+}
+
+func TestLevel2(t *testing.T) {
+	input := `two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen`
+
+	result := day01.Level2(strings.NewReader(input))
+
+	assert.Equal(t, 281, result)
 }

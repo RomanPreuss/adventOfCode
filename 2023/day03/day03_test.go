@@ -11,19 +11,32 @@ import (
 )
 
 func TestMain(t *testing.T) {
-	file, err := os.Open("lvl1.txt")
-	defer func() { _ = file.Close() }()
-	if err != nil {
-		log.Fatal(err)
-	}
+	t.Run("Level 1", func(t *testing.T) {
+		file, err := os.Open("lvl1.txt")
+		defer func() { _ = file.Close() }()
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	sum := day03.Level1(file)
-	// 941896 - too high
-	// 941896
-	// 547774 - also wrong
-	// 549908
-	log.Println("Level1: ", sum)
-	t.Fail()
+		sum := day03.Level1(file)
+		// 941896 - too high
+		// 941896
+		// 547774 - also wrong
+		// 549908
+		log.Println("Level1: ", sum)
+		t.Fail()
+	})
+	t.Run("Level 2", func(t *testing.T) {
+		file, err := os.Open("lvl2.txt")
+		defer func() { _ = file.Close() }()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		sum := day03.Level2(file)
+		log.Println("Level2: ", sum)
+		t.Fail()
+	})
 }
 
 func TestFindMaterialNumbers(t *testing.T) {
@@ -104,4 +117,34 @@ $..
 		assert.Equal(t, 4361, result)
 	})
 
+}
+
+func TestFindGearRatio(t *testing.T) {
+	t.Run("simple gear", func(t *testing.T) {
+		edgeCaseInput := `1*2`
+		field, width, height := day03.Parse(strings.NewReader(edgeCaseInput))
+		numbers := day03.FindGearRatio(field, width, height)
+
+		assert.Equal(t, []int{2}, numbers)
+	})
+
+	t.Run("simple gear 2", func(t *testing.T) {
+		edgeCaseInput := `.1.
+		.*.
+		..2`
+		field, width, height := day03.Parse(strings.NewReader(edgeCaseInput))
+		numbers := day03.FindGearRatio(field, width, height)
+
+		assert.Equal(t, []int{2}, numbers)
+	})
+
+	t.Run("simple gear 3", func(t *testing.T) {
+		edgeCaseInput := `.1.
+		.*.
+		5.2`
+		field, width, height := day03.Parse(strings.NewReader(edgeCaseInput))
+		numbers := day03.FindGearRatio(field, width, height)
+
+		assert.Equal(t, []int{}, numbers)
+	})
 }

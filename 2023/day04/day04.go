@@ -8,15 +8,16 @@ import (
 	"strings"
 )
 
-type Game struct {
-	ID      int
-	Score   int
-	Input   []int
-	Winners []int
+type Card struct {
+	ID          int
+	Score       int
+	CardMatches []int
+	Input       []int
+	Winners     []int
 }
 
-func Parse(input io.Reader) []Game {
-	result := []Game{}
+func Parse(input io.Reader) []Card {
+	result := []Card{}
 
 	scanner := bufio.NewScanner(input)
 	for scanner.Scan() {
@@ -29,7 +30,7 @@ func Parse(input io.Reader) []Game {
 		}
 
 		gameSections := strings.Split(gameRaw[1], "|")
-		game := Game{
+		game := Card{
 			ID:      gameID,
 			Winners: cardInputToIntArray(gameSections[0]),
 			Input:   cardInputToIntArray(gameSections[1]),
@@ -58,18 +59,22 @@ func cardInputToIntArray(gameNumbers string) []int {
 	return result
 }
 
-func Evaluate(game *Game) {
+func Evaluate(game *Card) {
+	winCounter := 1
 	for _, num := range game.Input {
 		for _, winNum := range game.Winners {
 			if num != winNum {
 				continue
 			}
 
+			game.CardMatches = append(game.CardMatches, game.ID+winCounter)
+
 			if game.Score == 0 {
 				game.Score = 1
 			} else {
 				game.Score = game.Score * 2
 			}
+			winCounter++
 		}
 	}
 }
@@ -83,4 +88,28 @@ func Level1(r io.Reader) int {
 	}
 
 	return totalScore
+}
+
+func Level2(r io.Reader) int {
+	cards := Parse(r)
+	// maps card id to number of matches
+	matchCount := map[int]int{}
+	totalMatches := 0
+
+	for _, card := range cards {
+		Evaluate(&card)
+
+		// also count original card
+		matchCount[card.ID] = matchCount[card.ID] + 1
+		for _, matchID := range card.CardMatches {
+			// card match is all counts of the current card + all previous matches
+			matchCount[matchID] = matchCount[card.ID] + matchCount[matchID]
+		}
+	}
+
+	for _, v := range matchCount {
+		totalMatches += v
+	}
+
+	return totalMatches
 }

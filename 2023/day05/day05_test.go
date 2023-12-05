@@ -11,15 +11,29 @@ import (
 )
 
 func TestMain(t *testing.T) {
-	file, err := os.Open("lvl1.txt")
-	defer func() { _ = file.Close() }()
-	if err != nil {
-		log.Fatal(err)
-	}
+	t.Run("Level 1", func(t *testing.T) {
+		file, err := os.Open("lvl1.txt")
+		defer func() { _ = file.Close() }()
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	lowestLocation := day05.Level1(file)
-	log.Println("Level 1 - lowest location", lowestLocation)
-	t.Fail()
+		lowestLocation := day05.Level1(file)
+		log.Println("Level 1 - lowest location", lowestLocation)
+		t.Fail()
+	})
+
+	t.Run("Level 2", func(t *testing.T) {
+		file, err := os.Open("lvl2.txt")
+		defer func() { _ = file.Close() }()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		lowestLocation := day05.Level2(file)
+		log.Println("Level 2 - lowest location", lowestLocation)
+		t.Fail()
+	})
 }
 
 func TestSeedPlan(t *testing.T) {
@@ -112,8 +126,13 @@ humidity-to-location map:
 		assert.Equal(t, 82, location)
 	})
 
-	t.Run("Level 2 - demo", func(t *testing.T) {
+	t.Run("Level 1 - demo", func(t *testing.T) {
 		lowestLocation := day05.Level1(strings.NewReader(input))
 		assert.Equal(t, 35, lowestLocation)
+	})
+
+	t.Run("Level 2 - demo", func(t *testing.T) {
+		lowestLocation := day05.Level2(strings.NewReader(input))
+		assert.Equal(t, 46, lowestLocation)
 	})
 }

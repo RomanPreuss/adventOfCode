@@ -2,10 +2,13 @@ package day05
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"log"
+	"math"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 const (
@@ -175,3 +178,73 @@ func Level1(reader io.Reader) int {
 	}
 	return lowestLocation
 }
+
+func Level2(reader io.Reader) int {
+	seeds, almanac := Parse(reader)
+
+	lowestLocation := math.MaxInt
+
+	for i := 0; i < len(seeds); i += 2 {
+		seedStart := seeds[i]
+		seedRange := seeds[i+1]
+		for seed := seedStart; seed < (seedStart + seedRange); seed++ {
+			newLocation := Traverse(seed, almanac)
+			// fmt.Println("seed", seed, "newLocation", newLocation)
+			if newLocation < lowestLocation {
+				lowestLocation = newLocation
+			}
+		}
+	}
+	return lowestLocation
+}
+
+// 125742456 204.398s
+
+func level2Worker(start, end int, almanac Almanac) int {
+	lowestLocation := math.MaxInt
+
+	for seed := start; seed < end; seed++ {
+		newLocation := Traverse(seed, almanac)
+		// fmt.Println("seed", seed, "newLocation", newLocation)
+		if newLocation < lowestLocation {
+			lowestLocation = newLocation
+		}
+	}
+	return lowestLocation
+}
+
+func Level2Parallel(reader io.Reader) int {
+	seeds, almanac := Parse(reader)
+
+	lowestLocation := math.MaxInt
+	var wg sync.WaitGroup
+
+	results := map[int]int{}
+
+	for i := 0; i < len(seeds); i += 2 {
+		wg.Add(1)
+		seedStart := seeds[i]
+		seedRange := seeds[i+1]
+		i := i
+		go func() {
+			fmt.Println("start worker for seedStart", seedStart)
+			defer wg.Done()
+			lowestLocation = level2Worker(seedStart, seedStart+seedRange, almanac)
+			results[i] = lowestLocation
+			fmt.Println("finish worker for seedStart", seedStart)
+		}()
+	}
+
+	wg.Wait()
+
+	for _, v := range results {
+		if v < lowestLocation {
+			lowestLocation = v
+		}
+	}
+
+	return lowestLocation
+}
+
+// normal: 		125742456 204.398s
+// parallel: 	125742456 45.377s

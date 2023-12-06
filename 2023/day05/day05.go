@@ -4,11 +4,11 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"log"
 	"math"
-	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/RomanPreuss/adventOfCode2023/helper"
 )
 
 const (
@@ -42,7 +42,7 @@ func Parse(r io.Reader) ([]int, Almanac) {
 
 		if strings.HasPrefix(line, "seeds: ") {
 			line = strings.TrimPrefix(line, "seeds: ")
-			seeds = digitStringToArray(line)
+			seeds = helper.DigitStringToArray(line)
 			continue
 		}
 
@@ -54,31 +54,31 @@ func Parse(r io.Reader) ([]int, Almanac) {
 
 		switch parsingMode {
 		case SEED_TO_SOIL_MODE:
-			if mapping := digitStringToArray(line); len(mapping) > 0 {
+			if mapping := helper.DigitStringToArray(line); len(mapping) > 0 {
 				almanac.SeedToSoil = append(almanac.SeedToSoil, mapping)
 			}
 		case SOIL_TO_FERTILIZER_MODE:
-			if mapping := digitStringToArray(line); len(mapping) > 0 {
+			if mapping := helper.DigitStringToArray(line); len(mapping) > 0 {
 				almanac.SoilToFertilizer = append(almanac.SoilToFertilizer, mapping)
 			}
 		case FERTILIZER_TO_WATER_MODE:
-			if mapping := digitStringToArray(line); len(mapping) > 0 {
+			if mapping := helper.DigitStringToArray(line); len(mapping) > 0 {
 				almanac.FertilizerToWater = append(almanac.FertilizerToWater, mapping)
 			}
 		case WATER_TO_LIGHT_MODE:
-			if mapping := digitStringToArray(line); len(mapping) > 0 {
+			if mapping := helper.DigitStringToArray(line); len(mapping) > 0 {
 				almanac.WaterToLight = append(almanac.WaterToLight, mapping)
 			}
 		case LIGHT_TO_TEMPERATURE_MODE:
-			if mapping := digitStringToArray(line); len(mapping) > 0 {
+			if mapping := helper.DigitStringToArray(line); len(mapping) > 0 {
 				almanac.LightToTemperature = append(almanac.LightToTemperature, mapping)
 			}
 		case TEMPERATURE_TO_HUMIDITY_MODE:
-			if mapping := digitStringToArray(line); len(mapping) > 0 {
+			if mapping := helper.DigitStringToArray(line); len(mapping) > 0 {
 				almanac.TemperatureToHumidity = append(almanac.TemperatureToHumidity, mapping)
 			}
 		case HUMIDITY_TO_LOCATION_MODE:
-			if mapping := digitStringToArray(line); len(mapping) > 0 {
+			if mapping := helper.DigitStringToArray(line); len(mapping) > 0 {
 				almanac.HumidityToLocation = append(almanac.HumidityToLocation, mapping)
 			}
 		}
@@ -107,26 +107,6 @@ func detectParsingMode(input string) (int, bool) {
 	default:
 		return -1, false
 	}
-}
-
-func digitStringToArray(input string) []int {
-	if input == "" {
-		return []int{}
-	}
-	result := []int{}
-	digits := strings.Split(input, " ")
-	for _, d := range digits {
-		if d == "" {
-			continue
-		}
-
-		v, err := strconv.Atoi(d)
-		if err != nil {
-			log.Fatalf("Error converting to int array '%v': %v \n", d, err)
-		}
-		result = append(result, v)
-	}
-	return result
 }
 
 func TraverseMapping(seed int, mapping []int) (int, bool) {
